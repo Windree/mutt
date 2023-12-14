@@ -11,48 +11,41 @@ fi
 
 function create_config() {
   local error=0
-  if [ -v host ]; then
-    echo "host $host"
-  else
-    echo "'host' required." 1>&2
-    error=1
-  fi
-  if [ -v port ]; then
-    echo "port $port"
-  else
-    echo "'port' required." 1>&2
-    error=1
-  fi
-  if [ -v from ]; then
+  if require_string from; then
     echo "from $from"
   else
-    echo "'from' required." 1>&2
     error=1
   fi
-  if [ -v tls ]; then
-    if require_boolean tls; then
-      echo "tls $tls"
-    else
-      error=1
-    fi
-  fi
-  if [ -v auth ]; then
-    if require_boolean auth; then
-      echo "auth $auth"
-    else
-      error=1
-    fi
-  fi
-  if [ -v user ]; then
-    echo "user $user"
+  if require_string smtp_host; then
+    echo "host $smtp_host"
   else
-    echo "'user' required if auth=on 1>&2." 1>&2
     error=1
   fi
-  if [ -v password ]; then
-    echo "password $password"
+  if require_string smtp_port; then
+    echo "port $smtp_port"
   else
-    echo "'password' required if auth=on." 1>&2
+    error=1
+  fi
+  if require_boolean smtp_tls; then
+    echo "tls $smtp_tls"
+  else
+    error=1
+  fi
+  if require_boolean smtp_auth; then
+    echo "auth $smtp_auth"
+    if [ -v user ]; then
+      echo "user $user"
+    else
+      echo "'user' required if smtp_auth=on 1>&2." 1>&2
+      error=1
+    fi
+    if [ -v password ]; then
+      echo "password $password"
+    else
+      echo "'password' required if smtp_auth=on." 1>&2
+      error=1
+    fi
+  else
     error=1
   fi
   if [ $error -ne 0 ]; then
@@ -61,11 +54,25 @@ function create_config() {
 }
 
 function require_boolean() {
-  if [[ ${!1} =~ ^(on|off)$ ]]; then
-    return 0
+  if [ ! -v ${1} ]; then
+    echo "'${1}' required." 1>&2
+    return 1
   fi
-  echo "'${1}' must be 'on' or 'off'. Currently '${!1}'." 1>&2
-  return 1
+  if ! [[ ${!1} =~ ^(on|off)$ ]]; then
+    echo "'${1}' must be 'on' or 'off'. Currently '${!1}'." 1>&2
+    return 1
+  fi
+}
+
+function require_string() {
+  if [ ! -v ${1} ]; then
+    echo "'${1}' required." 1>&2
+    return 1
+  fi
+  if [ -z ${!1} ]; then
+    echo "'${1}' required non empty string" 1>&2
+    return 1
+  fi
 }
 
 function cleanup() {

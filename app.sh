@@ -1,5 +1,5 @@
 #!/bin/env bash
-set -Eeuxo pipefail
+set -Eeuo pipefail
 
 args=("$@")
 dir=$(dirname "$(readlink -f -- "$0")")
