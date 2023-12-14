@@ -95,4 +95,4 @@ trap cleanup exit
 cat "$config".template >"$config"
 create_config >>"$config"
 
-mutt "$@"
+echo -n "$pipe" | mutt "$@"
