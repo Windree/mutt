@@ -1,31 +1,13 @@
 #!/bin/env bash
 set -Eeuo pipefail
 
-pipe=$(cat -)
 dir=$(dirname "$(readlink -f -- "$0")")
 config=/etc/msmtprc
-
-function main() {
-  local image=$(get_image_name "$dir/_/mutt.txt" mutt)
-  build_image "$dir/image" "$image"
-  echo "$pipe" | docker run --rm -i --env-file="$dir/.env" "$image" "${args[@]}"
-}
-
-function build_image() {
-  if ! docker build --quiet "$1" -t "$2" 2>/dev/null >/dev/null; then
-    echo "Error build '$dir/image'"
-    exit 1
-  fi
-}
-
-function get_image_name() {
-  if [ -f "$1" ]; then
-    cat "$1"
-    return 0
-  fi
-  mkdir -p "$(dirname "$1")"
-  echo -n $2-$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1) | tee "$1"
-}
+if [ -t 1 ]; then
+  unset pipe
+else
+  pipe=$(cat -)
+fi
 
 function create_config() {
   local error=0
@@ -95,4 +77,8 @@ trap cleanup exit
 cat "$config".template >"$config"
 create_config >>"$config"
 
-echo -n "$pipe" | mutt "$@"
+if [ -v pipe ]; then
+  echo "$pipe" | mutt "$@"
+else
+  mutt "$@"
+fi
