@@ -1,7 +1,7 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt update && \
-    apt install -y ca-certificates msmtp mutt && \
+    apt install -y msmtp mutt && \
     rm -rf /var/lib/apt/lists/*
 ADD _ /
 ENTRYPOINT ["/init.sh"]
