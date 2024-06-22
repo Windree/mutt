@@ -1,8 +1,36 @@
 #!/bin/env bash
 set -Eeuo pipefail
 
-args=("$@")
+source "$(dirname "${BASH_SOURCE[0]}")/functions/is_contains.sh"
+
+declare -a args=
+success_phrase=
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+  --success)
+    shift
+    success_phrase=$1
+    if [ $# -gt 0 ]; then
+      shift
+    fi
+    ;;
+  -s)
+    shift
+    subject=$1
+    if [ $# -gt 0 ]; then
+      shift
+    fi
+    ;;
+  *)
+    args+=($1)
+    shift
+    ;;
+  esac
+done
+
 dir=$(dirname "$(readlink -f -- "$0")")
+mutt_image=$(basename "$dir")-dar
 if [ -t 0 ]; then
   unset -v pipe
 else
@@ -10,12 +38,15 @@ else
 fi
 
 function main() {
-  local image=$(get_image_name "$dir/_/mutt.txt" mutt)
-  build_image "$dir/image" "$image"
-  if [ -v pipe ];then
-    echo "$pipe" | docker run --rm -i --env-file="$dir/.env" "$image" "${args[@]}"
+  build_image "$dir/image" "$mutt_image"
+  if [ -v pipe ]; then
+    local subj=$subject
+    if [ -n "$success_phrase" ]; then
+      subj=$(is_contains "$pipe" "$success_phrase" && echo "$subject ✓" || echo "$subject ⚠")
+    fi
+    echo "$pipe" | docker run --rm -i --env-file="$dir/.env" "$mutt_image" -s "$subj" "${args[@]}"
   else
-    docker run --rm -it --env-file="$dir/.env" "$image" "${args[@]}"
+    docker run --rm -it --env-file="$dir/.env" "$mutt_image" -s "$subject" "${args[@]}"
   fi
 }
 
@@ -24,15 +55,6 @@ function build_image() {
     echo "Error build '$dir/image'"
     exit 1
   fi
-}
-
-function get_image_name() {
-  if [ -f "$1" ]; then
-    cat "$1"
-    return 0
-  fi
-  mkdir -p "$(dirname "$1")"
-  echo -n $2-$(cat /dev/urandom | tr -dc 'a-z0-9' | fold -w 10 | head -n 1) | tee "$1"
 }
 
 function validate() {
