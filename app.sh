@@ -1,8 +1,9 @@
 #!/bin/env bash
 set -Eeuo pipefail
+source "$(dirname "${BASH_SOURCE[0]}")/image/_/functions/string_hash.sh"
 
 dir=$(dirname "$(readlink -f -- "$0")")
-mutt_image=$(basename "$dir")-dar
+mutt_image=mutt-$(string_hash $dir)
 pipe=
 
 if [ -t 0 ]; then
