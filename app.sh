@@ -1,4 +1,4 @@
-#!/bin/env bash
+#!/usr/bin/env bash
 set -Eeuo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/image/_/functions/string_hash.sh"
 
