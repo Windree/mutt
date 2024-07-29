@@ -3,12 +3,12 @@ set -Eeuo pipefail
 
 source "/functions/is_contains.sh"
 
-dir=$(dirname "$(readlink -f -- "$0")")
-config=/etc/msmtprc
-config_template=$config.template
-declare -a args=
-success_phrase=
-subject=
+declare dir=$(dirname "$(readlink -f -- "$0")")
+declare config=/etc/msmtprc
+declare config_template=$config.template
+declare -a args=()
+declare success_phrase=
+declare subject=
 
 if [ -t 1 ]; then
   unset pipe
