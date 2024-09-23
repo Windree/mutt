@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-set -Eeuo pipefail
-source "$(dirname "${BASH_SOURCE[0]}")/image/_/functions/string_hash.sh"
+set -euo pipefail
 
-dir=$(dirname "$(readlink -f -- "$0")")
-mutt_image=mutt-$(string_hash $dir)
-pipe=
+declare root="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+source "$root/image/_/functions/string_hash.sh"
+declare mutt_image=mutt-$(string_hash $root)
+declare pipe=
 
 if [ -t 0 ]; then
   unset -v pipe
@@ -14,24 +14,15 @@ fi
 
 function build_image() {
   if ! docker build --quiet "$1" -t "$2" 2>/dev/null >/dev/null; then
-    echo "Error build '$dir/image'"
+    echo "Error build '$root/image'"
     exit 1
   fi
 }
 
-function validate() {
-  if [ ! -f "$dir/.env" ]; then
-    echo "Unable to configuraton .env file."
-    exit 1
-  fi
-}
-
-validate
-
-build_image "$dir/image" "$mutt_image"
+build_image "$root/image" "$mutt_image"
 
 if [ -v pipe ]; then
-  echo "$pipe" | docker run --rm -i --env-file="$dir/.env" "$mutt_image" "$@"
+  echo "$pipe" | docker run --rm -i -v "$root/config/msmtprc:/etc/msmtprc" "$mutt_image" "$@"
 else
-  docker run --rm -it --env-file="$dir/.env" "$mutt_image" "$@"
+  docker run --rm -it "$mutt_image" "$@"
 fi
