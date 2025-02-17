@@ -22,7 +22,7 @@ function build_image() {
 build_image "$root/image" "$mutt_image"
 
 if [ -v pipe ]; then
-  echo "$pipe" | docker run --rm -i -v "$root/config/msmtprc:/etc/msmtprc" "$mutt_image" "$@"
+  echo "$pipe" | docker run --rm -i "$mutt_image" "$@"
 else
   docker run --rm -it "$mutt_image" "$@"
 fi

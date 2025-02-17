@@ -1,3 +1,4 @@
 /_/
 /.env
-config/msmtprc
+/image/_/etc/Muttrc.d/from.rc
+/image/_/etc/msmtprc
