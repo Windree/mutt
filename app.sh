@@ -2,7 +2,7 @@
 set -euo pipefail
 
 declare root="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
-source "$root/image/_/functions/string_hash.sh"
+source "$root/image/files/functions/string_hash.sh"
 declare mutt_image=mutt-$(string_hash $root)
 declare pipe=
 
