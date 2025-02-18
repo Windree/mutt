@@ -1,4 +1,3 @@
 /.env
 /image/files/etc/msmtprc
-
-image/files/etc/Muttrc.d/from.rc
+/image/files/etc/Muttrc.d/from.rc
