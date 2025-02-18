@@ -1,4 +1,3 @@
-/_/
 /.env
-/image/_/etc/Muttrc.d/from.rc
-/image/_/etc/msmtprc
+/image/files/etc/msmtprc
+/image/files/etc/Muttrc.d/from.rc
