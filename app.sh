@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-declare root="$(realpath "$(dirname "${BASH_SOURCE[0]}")")"
+declare root="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
 source "$root/image/files/functions/string_hash.sh"
 declare mutt_image=mutt-$(string_hash $root)
 declare pipe=

@@ -3,7 +3,6 @@ set -Eeuo pipefail
 
 source "/functions/is_contains.sh"
 
-declare dir=$(dirname "$(readlink -f -- "$0")")
 declare config=/etc/msmtprc
 declare config_template=$config.template
 declare -a args=()
