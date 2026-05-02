@@ -44,9 +44,14 @@ function main() {
     subj=$(echo -n "$subject "; is_contains "$pipe" "$success_phrase" && echo "✓" || echo "⚠")
   fi
   if [ -v pipe ]; then
-    echo "$pipe" | mutt -s "$subj" "${args[@]}"
+    for i in {1..12}; do
+      (echo "$pipe" | mutt -s "$subj" "${args[@]}") && break
+    done
   else
-    mutt -s "$subj" "${args[@]}"
+    for i in {1..12}; do
+      mutt -s "$subj" "${args[@]}" && break
+      sleep 10
+    done
   fi
 }
 
