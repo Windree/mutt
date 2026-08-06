@@ -24,9 +24,9 @@ fi
 
 # Check if standard input is a TTY
 if [ -t 0 ]; then
-  docker run --rm -it "$container_id" "$@"
+  docker run --rm --hostname mailer -it "$container_id" "$@"
 else
   # Consume stdin into a variable to mimic the original Bash logic
   pipe=$(cat)
-  echo "$pipe" | docker run --rm -i "$container_id" "$@"
+  echo "$pipe" | docker run --rm --hostname mailer -i "$container_id" "$@"
 fi
