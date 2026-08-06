@@ -1,28 +1,32 @@
-#!/usr/bin/env bash
-set -euo pipefail
+#!/bin/sh
+set -eu
 
-declare root="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")")"
-source "$root/image/files/functions/string_hash.sh"
-declare mutt_image=mutt-$(string_hash $root)
-declare pipe=
+# BusyBox/POSIX readlink lacks -f, use a portable directory change instead
+current_dir=$(dirname "$0")
+root=$(cd "$current_dir" && pwd -P)
 
-if [ -t 0 ]; then
-  unset -v pipe
+# Standard md5/md5sum compatibility check
+if command -v md5sum >/dev/null 2>&1; then
+  hash_val=$(echo "$root" | md5sum | awk '{ print $1}')
+elif command -v md5 >/dev/null 2>&1; then
+  hash_val=$(echo "$root" | md5)
 else
-  pipe=$(cat -)
+  # Fallback if no md5 tool is installed
+  hash_val=$(echo "$root" | cksum | awk '{ print $1}')
 fi
 
-function build_image() {
-  if ! docker build --quiet "$1" -t "$2" 2>/dev/null >/dev/null; then
-    echo "Error build '$root/image'"
-    exit 1
-  fi
-}
+container_id="mutt-$hash_val"
 
-build_image "$root/image" "$mutt_image"
+if ! docker build --quiet "$root/image" -t "$container_id" >/dev/null 2>&1; then
+  echo "Error build '$root/image'" >&2
+  exit 1
+fi
 
-if [ -v pipe ]; then
-  echo "$pipe" | docker run --rm -i "$mutt_image" "$@"
+# Check if standard input is a TTY
+if [ -t 0 ]; then
+  docker run --rm -it "$container_id" "$@"
 else
-  docker run --rm -it "$mutt_image" "$@"
+  # Consume stdin into a variable to mimic the original Bash logic
+  pipe=$(cat)
+  echo "$pipe" | docker run --rm -i "$container_id" "$@"
 fi

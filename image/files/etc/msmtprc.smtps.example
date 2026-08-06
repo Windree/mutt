@@ -4,6 +4,7 @@ host smtp.example.com
 port 465
 tls on
 tls_starttls off
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
 auth on
 user username
 password *******

@@ -1,0 +1,4 @@
+set charset="utf-8"
+set send_charset="utf-8"
+set from="Mail <dragon.windree@gmail.com>"
+set sendmail="/usr/bin/msmtp -t"

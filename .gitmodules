@@ -1,3 +1,0 @@
-[submodule "image/files/functions"]
-	path = image/files/functions
-	url = git@github.com:Windree/bash-functions.git

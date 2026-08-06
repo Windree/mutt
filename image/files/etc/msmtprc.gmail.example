@@ -3,6 +3,7 @@ from username@gmail.com
 host smtp.gmail.com
 port 587
 tls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
 auth on
 user username
-password *******
+password ********

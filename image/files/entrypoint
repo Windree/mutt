@@ -1,0 +1,49 @@
+#!/usr/bin/env fish
+
+set mutt_configuration "/etc/muttrc"
+set pipe ""
+
+# Check if stdin is a TTY
+if isatty 1
+    set -e pipe
+else
+    set pipe (cat -)
+end
+
+# Parse arguments using standard fish syntax
+set -l options 'p/success-phrase=' 's/subject=' 'c/content='
+argparse -i $options -- $argv
+or exit 1
+
+# Parse arguments
+set success_phrase $_flag_success_phrase
+set subject $_flag_subject
+set content $_flag_content
+set -g mutt_args $argv
+
+function main -v pipe -v subject -v success_phrase -v args
+    set -l subj $subject
+
+    if test -n "$success_phrase"
+        # Check if is_contains returns 0 (success)
+        if string match -q "*$success_phrase*" -- "$pipe"
+            set subj "$subject ✓"
+        else
+            set subj "$subject ⚠"
+        end
+    end
+
+    if set -q pipe
+        for i in (seq 1 12)
+            echo "$pipe" | mutt -F "$mutt_configuration" -s "$subj" $mutt_args $unnamed_args; and return
+            sleep 10
+        end
+    else
+        for i in (seq 1 12)
+            string join "\n" -- $content | mutt -F "$mutt_configuration" -s "$subj" $mutt_args; and return
+            sleep 10
+        end
+    end
+end
+
+main
