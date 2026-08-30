@@ -1,28 +1,34 @@
 #!/usr/bin/env fish
+#set -g fish_trace 1
 
 set mutt_configuration "/etc/muttrc"
-set pipe ""
+set -g pipe ""
 
 # Check if stdin is a TTY
 if isatty 1
     set -e pipe
 else
-    set pipe (cat -)
+    set -g pipe "$(cat)"
 end
 
 # Parse arguments using standard fish syntax
-set -l options 'p/success-phrase=' 's/subject=' 'c/content='
+set -l options 'success-phrase=' 'from=' 'from-name=' 'subject=' 'mime-type=' 'content-type='
 argparse -i $options -- $argv
 or exit 1
 
 # Parse arguments
 set success_phrase $_flag_success_phrase
 set subject $_flag_subject
+set from $_flag_from
+set from_name $_flag_from_name
+set content_type $_flag_content_type
 set content $_flag_content
 set -g mutt_args $argv
 
-function main -v pipe -v subject -v success_phrase -v args
+function main -v pipe -v from -v from_name -v subject -v success_phrase -v content_type -v args
     set -l subj $subject
+    set -l mail_content_type "text/plain"
+    set -l commands
 
     if test -n "$success_phrase"
         # Check if is_contains returns 0 (success)
@@ -32,10 +38,27 @@ function main -v pipe -v subject -v success_phrase -v args
             set subj "$subject ⚠"
         end
     end
+    
+    if test -n "$content_type"
+        set -a commands "content_type=\"$content_type\""
+    end
+
+    if test -n "$from"
+        set -a commands "from=\"$from\""
+    end
+
+    if test -n "$from_name"
+        set -a commands "realname=\"$from_name\""
+    end
+
+
+    if test (count $commands) -gt 0
+       set -a mutt_args "-e" "set $commands"
+    end
 
     if set -q pipe
         for i in (seq 1 12)
-            echo "$pipe" | mutt -F "$mutt_configuration" -s "$subj" $mutt_args $unnamed_args; and return
+            echo "$pipe" | mutt -F "$mutt_configuration" -s "$subj" $mutt_args; and return
             sleep 10
         end
     else

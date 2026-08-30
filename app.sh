@@ -27,6 +27,5 @@ if [ -t 0 ]; then
   docker run --rm --hostname mailer -it "$container_id" "$@"
 else
   # Consume stdin into a variable to mimic the original Bash logic
-  pipe=$(cat)
-  echo "$pipe" | docker run --rm --hostname mailer -i "$container_id" "$@"
+  cat | docker run --rm --hostname mailer -i "$container_id" "$@"
 fi
